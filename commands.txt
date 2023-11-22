@@ -1,0 +1,21 @@
+Start:
+docker run --rm --name pintos -v "$(pwd):/pintos" -it thierrysans/pintos bash
+docker exec -it pintos bash
+
+Debugger in build folder:
+pintos -v -k -T 60 --bochs --gdb -- -q run alarm-single
+
+pintos-gdb kernel.o
+debugpintos
+
+Debugger:
+b function || b file.c:123(line) : place breakpoint
+c : continue
+dumplist &all_list thread allelem : show all threads
+bt : show backtrace
+btthreadall : show backtrace for all threads
+n : step in (?)
+p var||*pointer : show what is in var/pointer
+q : quit debugger
+display var||*pointer : display value when getting to breakpoint
+s : step
