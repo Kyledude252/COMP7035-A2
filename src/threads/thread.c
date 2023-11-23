@@ -137,8 +137,10 @@ thread_tick (void)
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE) {
       int current_pri = thread_get_priority();
-      if (current_pri > 0)
+      if (current_pri > 0) {
           thread_set_priority(current_pri - 1);
+          // TODO: Implement resort of list item
+      }
       intr_yield_on_return();
   }
 }
