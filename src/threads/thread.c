@@ -135,8 +135,12 @@ thread_tick (void)
     kernel_ticks++;
 
   /* Enforce preemption. */
-  if (++thread_ticks >= TIME_SLICE)
-    intr_yield_on_return ();
+  if (++thread_ticks >= TIME_SLICE) {
+      int current_pri = thread_get_priority();
+      if (current_pri > 0)
+          thread_set_priority(current_pri - 1);
+      intr_yield_on_return();
+  }
 }
 
 /* Prints thread statistics. */

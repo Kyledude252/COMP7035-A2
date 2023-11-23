@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\lib",
+    "\\src\\lib\\kernel",
+    "\\src\\lib\\user",
+    "\\src\\tests",
+    "\\src\\tests\\threads",
+    "\\src\\threads",
+    "\\src\\utils"
+  ],
+  "SelectedNode": "\\src\\utils\\pintos",
+  "PreviewInSolutionExplorer": false
+}
