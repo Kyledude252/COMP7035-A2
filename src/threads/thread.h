@@ -145,6 +145,8 @@ void thread_set_priority (int);
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
+void thread_inc_recent_cpu(void);
+void thread_update_recent_cpu(void);
 int thread_get_load_avg (void);
 
 #endif /* threads/thread.h */

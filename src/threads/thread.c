@@ -139,7 +139,7 @@ thread_tick (void)
   if (++thread_ticks >= TIME_SLICE) {
       intr_yield_on_return();
   }
-  if (timer_ticks % )
+
 }
 
 /* Prints thread statistics. */
@@ -345,9 +345,9 @@ thread_set_priority (int new_priority)
 
 thread_update_priority()
 {
-    if (!thread_mlfqs)
-        thread_current()->priority = new_priority;
-    else {
+    if (!thread_mlfqs) {
+        int recent_cpu = thread_current()->recent_cpu;
+        int nice = thread_current()->nice;
         thread_current()->priority = PRI_MAX - (recent_cpu / 4) - (nice * 2);
     }
 }
@@ -386,6 +386,20 @@ int
 thread_get_recent_cpu (void) 
 {
     return thread_current ()->recent_cpu;
+}
+
+/*  */
+void
+thread_inc_recent_cpu(void)
+{
+    thread_current ()->recent_cpu = thread_current()->recent_cpu + 1;
+}
+
+/*  */
+void
+thread_update_recent_cpu(struct thread* t, void* aux UNUSED)
+{
+    int load_avg = thread_get_load_avg()
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -475,6 +489,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->nice = NICE_DEFAULT;
+  t->recent_cpu = 0;
   t->magic = THREAD_MAGIC;
 
   old_level = intr_disable ();
