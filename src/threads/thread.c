@@ -21,6 +21,7 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
+static int load_avg = LOAD_AVG_DEFAULT;
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -377,20 +378,38 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  fixed_point_t load_avg_100 = fp_multiply(int_to_fp(load_avg), int_to_fp(100));
+    return fp_to_int_round_nearest(load_avg_100);
 }
 
 /* Returns 100 times the system load average. */
 void
 thread_update_load_avg(void)
 {
+    struct thread* cur;
+    int ready_list_threads;
+    int ready_threads;
 
+    cur = thread_current();
+    ready_list_threads = list_size(&ready_list);
+
+    if (cur != idle_thread)
+    {
+        ready_threads = ready_list_threads + 1;
+    }
+    else
+    {
+        ready_threads = ready_list_threads;
+    }
+
+    fixed_point_t a = fp_multiply(fp_divide(int_to_fp(59), int_to_fp(60)), int_to_fp(load_avg));
+    fixed_point_t b = fp_multiply(fp_divide(int_to_fp(1), int_to_fp(60)), int_to_fp(ready_threads));
+    cur->load_avg = fp_to_int_round_nearest(fp_add(a, b));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
-thread_get_recent_cpu (void) 
+thread_get_recent_cpu (void)
 {
     fixed_point_t product = fp_multiply(thread_current()->recent_cpu, 100);
     return fp_to_int_round_nearest(product);
@@ -415,13 +434,13 @@ thread_update_recent_cpu(struct thread* t, void* aux UNUSED)
     fixed_point_t load_avg_fp = int_to_fp(load_avg);
     fixed_point_t nice_fp = int_to_fp(nice);
 
-    fixed_point_t decay_a = fp_multiply(int_to_fp(2), load_avg_fp);
-    fixed_point_t decay_b = fp_add(decay_a, 1);
-    fixed_point_t decay = fp_divide(decay_a, decay_b);
+    fixed_point_t decay_a_fp = fp_multiply(int_to_fp(2), load_avg_fp);
+    fixed_point_t decay_b_fp = fp_add(decay_a_fp, 1);
+    fixed_point_t decay_fp = fp_divide(decay_a_fp, decay_b_fp);
 
-    t->load_avg = fp_to_int_round_nearest();
-    fixed_point_t new_recent_cpu = 
-    fixed_point_t new_recent_cpu = 
+    thread_update_load_avg();
+    fixed_point_t new_recent_cpu_fp = fp_add(fp_multiply(decay_fp, recent_cpu_fp), nice_fp);
+    t->recent_cpu = fp_to_int_round_nearest(new_recent_cpu_fp);
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
