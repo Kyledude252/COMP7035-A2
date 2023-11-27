@@ -343,8 +343,9 @@ thread_set_priority (int new_priority)
         thread_current ()->priority = new_priority;
 }
 
-
-thread_update_priority()
+/* Sets the current thread's priority to NEW_PRIORITY. */
+void
+thread_update_priority(struct thread* t, void* aux UNUSED)
 {
     if (!thread_mlfqs) {
         int recent_cpu = thread_current()->recent_cpu;
@@ -392,19 +393,16 @@ thread_update_load_avg(void)
 
     cur = thread_current();
     ready_list_threads = list_size(&ready_list);
-
+    ready_threads = ready_list_threads;
     if (cur != idle_thread)
     {
-        ready_threads = ready_list_threads + 1;
-    }
-    else
-    {
-        ready_threads = ready_list_threads;
+        ready_threads = ready_threads + 1;
     }
 
     fixed_point_t a = fp_multiply(fp_divide(int_to_fp(59), int_to_fp(60)), int_to_fp(load_avg));
     fixed_point_t b = fp_multiply(fp_divide(int_to_fp(1), int_to_fp(60)), int_to_fp(ready_threads));
-    cur->load_avg = fp_to_int_round_nearest(fp_add(a, b));
+    load_avg = fp_to_int_round_nearest(fp_add(a, b));
+    // msg("%d", load_avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */

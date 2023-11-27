@@ -22,7 +22,7 @@ fixed_point_t fp_to_int_round_down(fixed_point_t a){
 //convert fixed point to int, round to nearest int
 fixed_point_t fp_to_int_round_nearest(fixed_point_t a){
     if(a >= 0){
-        return (a - (FP_LIMIT / 2)) / FP_LIMIT;
+        return (a + (FP_LIMIT / 2)) / FP_LIMIT;
     }
     else{
         return (a - (FP_LIMIT / 2))/ FP_LIMIT;
