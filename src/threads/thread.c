@@ -347,11 +347,11 @@ thread_set_priority (int new_priority)
 void
 thread_update_priority(struct thread* t, void* aux UNUSED)
 {
-    if (!thread_mlfqs) {
-        int recent_cpu = thread_current()->recent_cpu;
+    if (thread_mlfqs) {
+        fp recent_cpu = thread_current()->recent_cpu;
         int nice = thread_current()->nice;
-        thread_current()->priority = PRI_MAX - (recent_cpu / 4) - (nice * 2);
-        msg("%d", thread_current()->priority);
+        thread_current()->priority = PRI_MAX - (CONVERT_TO_INT_NEAREST(recent_cpu) / 4) - (nice * 2);
+        //msg("%d", thread_current()->priority);
     }
 }
 
@@ -380,8 +380,9 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void) 
 {
-  fp load_avg_100 = MULTIPLY_INTEGER(CONVERT_TO_FP(load_avg), 100);
-    return load_avg_100;
+  fp load_avg_100 = CONVERT_TO_INT_NEAREST(MULTIPLY_INTEGER(CONVERT_TO_FP(load_avg), 100));
+  return load_avg_100;
+
 }
 
 /* Returns 100 times the system load average. */
@@ -402,8 +403,8 @@ thread_update_load_avg(void)
 
     fp a = MULTIPLY_FP(DIVIDE_FP(CONVERT_TO_FP(59), CONVERT_TO_FP(60)), thread_get_load_avg());
     fp b = MULTIPLY_FP(DIVIDE_INTEGER(CONVERT_TO_FP(1), CONVERT_TO_FP(60)), ready_threads);
-    load_avg = CONVERT_TO_INT_NEAREST(ADD_FP(a, b));
-    // msg("%d", load_avg);
+    load_avg = CONVERT_TO_INT_NEAREST(MULTIPLY_INTEGER(ADD_FP(a, b), 100));
+    msg("%d", list_size(&ready_list));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
@@ -418,7 +419,7 @@ thread_get_recent_cpu (void)
 void
 thread_inc_recent_cpu(void)
 {
-    thread_current ()->recent_cpu = thread_current()->recent_cpu + 1;
+    thread_current ()->recent_cpu = ADD_INTEGER(thread_current()->recent_cpu, 1);
 }
 
 /*  */
@@ -439,8 +440,8 @@ thread_update_recent_cpu(struct thread* t, void* aux UNUSED)
 
     thread_update_load_avg();
     fp new_recent_cpu_fp = ADD_FP(MULTIPLY_INTEGER(decay_fp, recent_cpu_fp), nice);
-    t->recent_cpu = CONVERT_TO_INT_NEAREST(new_recent_cpu_fp);
-    msg("%d", t->recent_cpu);
+    t->recent_cpu = new_recent_cpu_fp;
+    //msg("%d", t->recent_cpu);
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
