@@ -22,7 +22,7 @@ typedef int tid_t;
 
 /* Thread priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
-#define PRI_DEFAULT 31                  /* Default priority. */
+#define PRI_DEFAULT 3                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
 #define NICE_MIN -20                    /* Lowest niceness */
@@ -152,5 +152,7 @@ void thread_update_load_avg(void);
 int thread_get_recent_cpu (void);
 void thread_inc_recent_cpu(void);
 void thread_update_recent_cpu(struct thread* t, void* aux UNUSED);
+
+bool thread_priority_cmp(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 
 #endif /* threads/thread.h */
