@@ -385,13 +385,14 @@ thread_get_load_avg (void)
 
 }
 
-/* Returns 100 times the system load average. */
+/*  */
 void
 thread_update_load_avg(void)
 {
     struct thread* cur;
     int ready_list_threads;
     int ready_threads;
+    fp current_avg = thread_get_load_avg();
 
     cur = thread_current();
     ready_list_threads = list_size(&ready_list);
@@ -400,11 +401,12 @@ thread_update_load_avg(void)
     {
         ready_threads = ready_threads + 1;
     }
+    // msg("%d", CONVERT_TO_INT_NEAREST(DIVIDE_FP(CONVERT_TO_FP(29), CONVERT_TO_FP(60))));
 
-    fp a = MULTIPLY_FP(DIVIDE_FP(CONVERT_TO_FP(59), CONVERT_TO_FP(60)), thread_get_load_avg());
-    fp b = MULTIPLY_FP(DIVIDE_INTEGER(CONVERT_TO_FP(1), CONVERT_TO_FP(60)), ready_threads);
-    load_avg = CONVERT_TO_INT_NEAREST(MULTIPLY_INTEGER(ADD_FP(a, b), 100));
-    msg("%d", list_size(&ready_list));
+    fp a = MULTIPLY_FP(DIVIDE_FP(CONVERT_TO_FP(59), CONVERT_TO_FP(60)), current_avg);
+    fp b = MULTIPLY_FP(DIVIDE_FP(CONVERT_TO_FP(1), CONVERT_TO_FP(60)), CONVERT_TO_FP(ready_threads));
+    load_avg = ADD_FP(a, b);
+    msg("ready threads: %d, current avg: %d, A: %d, B: %d, load: %d", ready_threads, CONVERT_TO_INT_NEAREST(current_avg), CONVERT_TO_INT_NEAREST(a), CONVERT_TO_INT_NEAREST(b), CONVERT_TO_INT_NEAREST(load_avg));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */

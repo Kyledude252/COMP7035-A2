@@ -24,10 +24,10 @@ typedef int fp;
 #define CONVERT_TO_INT_TOWARD_ZERO(x) (x >> Q)
 #define CONVERT_TO_INT_NEAREST(x) (x >= 0 ? ((x + (1 << (Q - 1))) >> Q) : ((x - (1 << (Q - 1))) >> Q))
 
-#define DIVIDE_FP(x,y) (x / y)
-#define DIVIDE_INTEGER(x,n) ((fp)((((int64_t) x) << Q) / n))
+#define DIVIDE_INTEGER(x,n) (x / n)
+#define DIVIDE_FP(x,y) ((fp)((((int64_t) x) << Q) / y))
 
-#define MULTIPLY_FP(x,y) (x * y)
-#define MULTIPLY_INTEGER(x,n) ((fp)(((int64_t) x) * n >> Q))
+#define MULTIPLY_INTEGER(x,n) (x * n)
+#define MULTIPLY_FP(x,y) ((fp)(((int64_t) x) * y >> Q))
 
 #endif
