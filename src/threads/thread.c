@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include "devices/timer.h"
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -135,8 +136,10 @@ thread_tick (void)
     kernel_ticks++;
 
   /* Enforce preemption. */
-  if (++thread_ticks >= TIME_SLICE)
-    intr_yield_on_return ();
+  if (++thread_ticks >= TIME_SLICE) {
+      intr_yield_on_return();
+  }
+  if (timer_ticks % )
 }
 
 /* Prints thread statistics. */
@@ -337,6 +340,16 @@ thread_set_priority (int new_priority)
 {
     if (!thread_mlfqs)
         thread_current ()->priority = new_priority;
+}
+
+
+thread_update_priority()
+{
+    if (!thread_mlfqs)
+        thread_current()->priority = new_priority;
+    else {
+        thread_current()->priority = PRI_MAX - (recent_cpu / 4) - (nice * 2);
+    }
 }
 
 /* Returns the current thread's priority. */
