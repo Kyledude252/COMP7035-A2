@@ -2,51 +2,32 @@
 #define THREADS_FIXED_POINT_H
 #include <stdint.h>
 
-typedef int32_t fixed_point_t;
+#define P 16
+#define Q 15
+#define F (1 << Q)
 
-//number of decimal point bits
-#define FP_SHIFT 14
-//1 in fixed point
-#define FP_LIMIT (1 << FP_SHIFT)
+#if P + Q != 31
+#error "P + Q must equal 31"
+#endif
 
-//convert int into fixed point
-fixed_point_t int_to_fp(int n){
-    return n * FP_LIMIT;
-}
+typedef int fp;
 
-//convert fixed point into int, rounding to 0
-fixed_point_t fp_to_int_round_down(fixed_point_t a){
-    return a / FP_LIMIT;
-}
+typedef int fp;
 
-//convert fixed point to int, round to nearest int
-fixed_point_t fp_to_int_round_nearest(fixed_point_t a){
-    if(a >= 0){
-        return (a + (FP_LIMIT / 2)) / FP_LIMIT;
-    }
-    else{
-        return (a - (FP_LIMIT / 2))/ FP_LIMIT;
-    }
-}
+#define ADD_FP(x,y) (x + y)
+#define ADD_INTEGER(x,n) (x + (n << Q))
 
-//add fixed point numbers
-fixed_point_t fp_add(fixed_point_t a, fixed_point_t b){
-    return a + b;
-}
+#define SUB_FP(x,y) (x - y)
+#define SUB_INTEGER(x,n) (x - (n << Q))
 
-//subtract fixed point numbers
-fixed_point_t fp_subtract(fixed_point_t a, fixed_point_t b){
-    return a - b;
-}
+#define CONVERT_TO_FP(x) ((fp)(x << Q))
+#define CONVERT_TO_INT_TOWARD_ZERO(x) (x >> Q)
+#define CONVERT_TO_INT_NEAREST(x) (x >= 0 ? ((x + (1 << (Q - 1))) >> Q) : ((x - (1 << (Q - 1))) >> Q))
 
-//multiply fixed point numbers
-fixed_point_t fp_multiply(fixed_point_t a, fixed_point_t b){
-    return (((int64_t)a) * b) / FP_LIMIT;
-}
+#define DIVIDE_FP(x,y) (x / y)
+#define DIVIDE_INTEGER(x,n) ((fp)((((int64_t) x) << Q) / n))
 
-//divide fixed point numbers
-fixed_point_t fp_divide(fixed_point_t a, fixed_point_t b){
-    return (((int64_t)a) * FP_LIMIT) / b;
-}
+#define MULTIPLY_FP(x,y) (x * y)
+#define MULTIPLY_INTEGER(x,n) ((fp)(((int64_t) x) * n >> Q))
 
 #endif

@@ -21,7 +21,7 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
-static int load_avg = LOAD_AVG_DEFAULT;
+static fp load_avg = LOAD_AVG_DEFAULT;
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -351,6 +351,7 @@ thread_update_priority(struct thread* t, void* aux UNUSED)
         int recent_cpu = thread_current()->recent_cpu;
         int nice = thread_current()->nice;
         thread_current()->priority = PRI_MAX - (recent_cpu / 4) - (nice * 2);
+        msg("%d", thread_current()->priority);
     }
 }
 
@@ -379,8 +380,8 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void) 
 {
-  fixed_point_t load_avg_100 = fp_multiply(int_to_fp(load_avg), int_to_fp(100));
-    return fp_to_int_round_nearest(load_avg_100);
+  fp load_avg_100 = MULTIPLY_INTEGER(CONVERT_TO_FP(load_avg), 100);
+    return load_avg_100;
 }
 
 /* Returns 100 times the system load average. */
@@ -399,9 +400,9 @@ thread_update_load_avg(void)
         ready_threads = ready_threads + 1;
     }
 
-    fixed_point_t a = fp_multiply(fp_divide(int_to_fp(59), int_to_fp(60)), int_to_fp(load_avg));
-    fixed_point_t b = fp_multiply(fp_divide(int_to_fp(1), int_to_fp(60)), int_to_fp(ready_threads));
-    load_avg = fp_to_int_round_nearest(fp_add(a, b));
+    fp a = MULTIPLY_FP(DIVIDE_FP(CONVERT_TO_FP(59), CONVERT_TO_FP(60)), thread_get_load_avg());
+    fp b = MULTIPLY_FP(DIVIDE_INTEGER(CONVERT_TO_FP(1), CONVERT_TO_FP(60)), ready_threads);
+    load_avg = CONVERT_TO_INT_NEAREST(ADD_FP(a, b));
     // msg("%d", load_avg);
 }
 
@@ -409,8 +410,8 @@ thread_update_load_avg(void)
 int
 thread_get_recent_cpu (void)
 {
-    fixed_point_t product = fp_multiply(thread_current()->recent_cpu, 100);
-    return fp_to_int_round_nearest(product);
+    fp product = MULTIPLY_INTEGER(thread_current()->recent_cpu, 100);
+    return CONVERT_TO_INT_NEAREST(product);
 }
 
 /*  */
@@ -428,17 +429,18 @@ thread_update_recent_cpu(struct thread* t, void* aux UNUSED)
     int load_avg = thread_get_load_avg();
     int nice = thread_get_nice();
 
-    fixed_point_t recent_cpu_fp = fp_divide(int_to_fp(recent_cpu), 100);
-    fixed_point_t load_avg_fp = int_to_fp(load_avg);
-    fixed_point_t nice_fp = int_to_fp(nice);
+    fp recent_cpu_fp = DIVIDE_INTEGER(CONVERT_TO_FP(recent_cpu), 100);
+    // fp load_avg_fp = CONVERT_TO_FP(load_avg);
+    // fp nice_fp = CONVERT_TO_FP(nice);
 
-    fixed_point_t decay_a_fp = fp_multiply(int_to_fp(2), load_avg_fp);
-    fixed_point_t decay_b_fp = fp_add(decay_a_fp, 1);
-    fixed_point_t decay_fp = fp_divide(decay_a_fp, decay_b_fp);
+    fp decay_a_fp = MULTIPLY_FP(load_avg, 2);
+    fp decay_b_fp = ADD_INTEGER(decay_a_fp, 1);
+    fp decay_fp = DIVIDE_FP(decay_a_fp, decay_b_fp);
 
     thread_update_load_avg();
-    fixed_point_t new_recent_cpu_fp = fp_add(fp_multiply(decay_fp, recent_cpu_fp), nice_fp);
-    t->recent_cpu = fp_to_int_round_nearest(new_recent_cpu_fp);
+    fp new_recent_cpu_fp = ADD_FP(MULTIPLY_INTEGER(decay_fp, recent_cpu_fp), nice);
+    t->recent_cpu = CONVERT_TO_INT_NEAREST(new_recent_cpu_fp);
+    msg("%d", t->recent_cpu);
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
