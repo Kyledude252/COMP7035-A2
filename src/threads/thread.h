@@ -28,6 +28,8 @@ typedef int tid_t;
 #define NICE_DEFAULT 0                  /* Default niceness */
 #define NICE_MAX 20                     /* Highest niceness */
 
+#define LOAD_AVG_DEFAULT 0              /* Default load avg */
+
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -95,6 +97,7 @@ struct thread
     struct list_elem allelem;           /* List element for all threads list. */
     int nice;                           /*  */
     int recent_cpu;                     /*  */
+    int load_avg;                       /*  */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -144,9 +147,10 @@ void thread_set_priority (int);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
+int thread_get_load_avg(void);
+void thread_update_load_avg(void)
 int thread_get_recent_cpu (void);
 void thread_inc_recent_cpu(void);
-void thread_update_recent_cpu(void);
-int thread_get_load_avg (void);
+void thread_update_recent_cpu(struct thread* t, void* aux UNUSED);
 
 #endif /* threads/thread.h */

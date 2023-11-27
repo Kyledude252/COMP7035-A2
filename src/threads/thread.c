@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include "threads/fixed_point.h"
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -380,11 +381,19 @@ thread_get_load_avg (void)
   return 0;
 }
 
+/* Returns 100 times the system load average. */
+void
+thread_update_load_avg(void)
+{
+
+}
+
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) 
 {
-    return thread_current ()->recent_cpu;
+    fixed_point_t product = fp_multiply(thread_current()->recent_cpu, 100);
+    return fp_to_int_round_nearest(product);
 }
 
 /*  */
@@ -398,9 +407,23 @@ thread_inc_recent_cpu(void)
 void
 thread_update_recent_cpu(struct thread* t, void* aux UNUSED)
 {
-    int load_avg = thread_get_load_avg()
+    int recent_cpu = thread_get_recent_cpu();
+    int load_avg = thread_get_load_avg();
+    int nice = thread_get_nice();
+
+    fixed_point_t recent_cpu_fp = fp_divide(int_to_fp(recent_cpu), 100);
+    fixed_point_t load_avg_fp = int_to_fp(load_avg);
+    fixed_point_t nice_fp = int_to_fp(nice);
+
+    fixed_point_t decay_a = fp_multiply(int_to_fp(2), load_avg_fp);
+    fixed_point_t decay_b = fp_add(decay_a, 1);
+    fixed_point_t decay = fp_divide(decay_a, decay_b);
+
+    t->load_avg = fp_to_int_round_nearest();
+    fixed_point_t new_recent_cpu = 
+    fixed_point_t new_recent_cpu = 
 }
-
+
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by

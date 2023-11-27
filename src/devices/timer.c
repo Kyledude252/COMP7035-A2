@@ -176,8 +176,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-
-  if (thread_current()->status == thread_status.THREAD_RUNNING)
+  if (thread_current()->status == THREAD_RUNNING)
       thread_inc_recent_cpu();
   if (timer_ticks() % TIMER_FREQ == 0) {
       thread_foreach(thread_update_recent_cpu, 0);
